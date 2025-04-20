@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Happy Birthday!</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+
+    .section {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: transparent;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+      z-index: 3;
+    }
+
+    .section.visible {
+      opacity: 1;
+    }
+
+    #message-box {
+      background: #fff176;
+      color: #333;
+      padding: 30px;
+      border-radius: 10px;
+      font-size: 1.5rem;
+      white-space: pre-wrap;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transform: rotate(-2deg);
+    }
+
+    .hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      transform: rotate(45deg);
+      animation: float 5s infinite;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -5px;
+      left: 0;
+    }
+
+    .heart::after {
+      left: -5px;
+      top: 0;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(45deg); opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(45deg); opacity: 0; }
+    }
+
+    img {
+      max-width: 450px;
+      border-radius: 10px;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="hearts" id="hearts-container"></div>
+
+<canvas id="canvas"></canvas>
+
+<!-- Section 2: Typing Message -->
+<div class="section" id="typing-section">
+  <div id="message-box"></div>
+</div>
+
+<!-- Section 3: Final Image + Music + Hearts -->
+<div class="section" id="final-section">
+  <div>
+    <img src="jamal.jpg" alt="Birthday Image" />
+    <audio src="jamal.mp3" autoplay loop></audio>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const message = "Happy Birthday!";
+  const letters = [];
+
+  const startX = canvas.width / 2 - (message.length * 50) / 2;
+
+  for (let i = 0; i < message.length; i++) {
+    const x = startX + i * 50;
+    const y = canvas.height + Math.random() * 200;
+    letters.push({
+      char: message[i],
+      x: x,
+      y: y,
+      targetY: canvas.height / 2 - 50,
+      color: `hsl(${(i / message.length) * 360}, 100%, 60%)`,
+      floatSpeed: 1 + Math.random() * 0.5
+    });
+  }
+
+  function drawBalloon(x, y, color) {
+    ctx.beginPath();
+    ctx.arc(x, y - 50, 10, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = "#fff";
+    ctx.stroke();
+
+    // Balloon string
+    ctx.beginPath();
+    ctx.moveTo(x, y - 40);
+    ctx.lineTo(x, y - 10);
+    ctx.strokeStyle = "white";
+    ctx.stroke();
+  }
+
+  function drawScene() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let allAtTop = true;
+
+    letters.forEach(letter => {
+      if (letter.y > letter.targetY) {
+        letter.y -= letter.floatSpeed;
+        allAtTop = false;
+      }
+
+      drawBalloon(letter.x, letter.y, letter.color);
+      ctx.fillStyle = letter.color;
+      ctx.font = "40px sans-serif";
+      ctx.fillText(letter.char, letter.x - 10, letter.y + 10);
+    });
+
+    if (!allAtTop) {
+      requestAnimationFrame(drawScene);
+    } else {
+      setTimeout(() => {
+        canvas.style.display = "none";
+        document.getElementById("typing-section").classList.add("visible");
+        typeMessage();
+      }, 1500);
+    }
+  }
+
+  drawScene();
+
+  // TYPING EFFECT
+  const messageText = "Happy Birthday,\nI wish you all the good this life has to give cause you really deserve it,\nYou're already a great story,just make sure there’s cake in this one,\nhave an amazing ,amazing day🎊🎀,\nHAPPY INTERNATIONAL JAMAL DAY🎂🎈!!!";
+  let i = 0;
+
+  function typeMessage() {
+    const box = document.getElementById("message-box");
+    if (i < messageText.length) {
+      box.textContent += messageText[i];
+      i++;
+      setTimeout(typeMessage, 70);
+    } else {
+      setTimeout(() => {
+        document.getElementById("typing-section").classList.remove("visible");
+        document.getElementById("final-section").classList.add("visible");
+      }, 2000);
+    }
+  }
+
+  // HEARTS FLOATING
+  function generateHearts() {
+    const container = document.getElementById("hearts-container");
+    for (let i = 0; i < 100; i++) {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.top = Math.random() * 100 + "vh";
+      heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+      container.appendChild(heart);
+    }
+  }
+
+  generateHearts();
+</script>
+
+</body>
+</html>
+

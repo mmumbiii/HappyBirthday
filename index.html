@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Happy Birthday Jamal💖!</title>
   <style>
     html, body {
@@ -12,6 +12,8 @@
       overflow: hidden;
       color: white;
       font-family: 'Segoe UI', sans-serif;
+      height: 100%;
+      width: 100%;
     }
 
     canvas {
@@ -33,6 +35,7 @@
       opacity: 0;
       transition: opacity 1.5s ease;
       z-index: 3;
+      padding: 10px;
     }
 
     .section.visible {
@@ -42,12 +45,12 @@
     #message-box {
       background: #fff176;
       color: #333;
-      padding: 30px;
+      padding: 20px;
       border-radius: 10px;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       white-space: pre-wrap;
-      width: 80%;
-      max-width: 500px;
+      width: 90%;
+      max-width: 480px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       transform: rotate(-2deg);
     }
@@ -98,27 +101,32 @@
     }
 
     img {
-      max-width: 450px;
+      max-width: 90%;
+      max-height: 70vh;
       border-radius: 10px;
     }
 
     audio {
       display: none;
     }
+
+    @media (max-width: 500px) {
+      #message-box {
+        font-size: 1rem;
+        padding: 15px;
+      }
+    }
   </style>
 </head>
 <body>
 
 <div class="hearts" id="hearts-container"></div>
-
 <canvas id="canvas"></canvas>
 
-<!-- Section 2: Typing Message -->
 <div class="section" id="typing-section">
   <div id="message-box"></div>
 </div>
 
-<!-- Section 3: Final Image + Music + Hearts -->
 <div class="section" id="final-section">
   <div>
     <img src="jamal.jpg" alt="Birthday Image" />
@@ -129,26 +137,42 @@
 <script>
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    initLetters(); // reinitialize on resize
+    drawScene();
+  });
 
   const message = "Happy Birthday!";
-  const letters = [];
+  let letters = [];
 
-  const startX = canvas.width / 2 - (message.length * 50) / 2;
+  function initLetters() {
+    letters = [];
+    const letterSpacing = Math.min(window.innerWidth / message.length, 40);
+    const startX = canvas.width / 2 - (message.length * letterSpacing) / 2;
 
-  for (let i = 0; i < message.length; i++) {
-    const x = startX + i * 50;
-    const y = canvas.height + Math.random() * 200;
-    letters.push({
-      char: message[i],
-      x: x,
-      y: y,
-      targetY: canvas.height / 2 - 50,
-      color: `hsl(${(i / message.length) * 360}, 100%, 60%)`,
-      floatSpeed: 1 + Math.random() * 0.5
-    });
+    for (let i = 0; i < message.length; i++) {
+      const x = startX + i * letterSpacing;
+      const y = canvas.height + Math.random() * 200;
+      letters.push({
+        char: message[i],
+        x: x,
+        y: y,
+        targetY: canvas.height / 2 - 60,
+        color: `hsl(${(i / message.length) * 360}, 100%, 60%)`,
+        floatSpeed: 1 + Math.random() * 0.5
+      });
+    }
   }
+
+  initLetters();
 
   function drawBalloon(x, y, color) {
     ctx.beginPath();
@@ -158,7 +182,6 @@
     ctx.strokeStyle = "#fff";
     ctx.stroke();
 
-    // Balloon string
     ctx.beginPath();
     ctx.moveTo(x, y - 40);
     ctx.lineTo(x, y - 10);
@@ -170,6 +193,9 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     let allAtTop = true;
+    const fontSize = Math.min(window.innerWidth / 12, 38);
+    ctx.font = `${fontSize}px sans-serif`;
+    ctx.textBaseline = "middle";
 
     letters.forEach(letter => {
       if (letter.y > letter.targetY) {
@@ -179,7 +205,6 @@
 
       drawBalloon(letter.x, letter.y, letter.color);
       ctx.fillStyle = letter.color;
-      ctx.font = "40px sans-serif";
       ctx.fillText(letter.char, letter.x - 10, letter.y + 10);
     });
 
@@ -197,7 +222,7 @@
   drawScene();
 
   // TYPING EFFECT
-  const messageText = "Happy Birthday,\nI wish you all the good this life has to give cause you really deserve it,\nYou're already a great story,just make sure there’s cake in this one,\nhave an amazing ,amazing day🎊🎀,\nHAPPY INTERNATIONAL JAMAL DAY🎂🎈!!!";
+  const messageText = "Happy Birthday,\nI wish you all the good this life has to give cause you really deserve it,\nYou're already a great story, just make sure there’s cake in this one,\nhave an amazing, amazing day 🎊🎀,\nHAPPY INTERNATIONAL JAMAL DAY 🎂🎈!!!";
   let i = 0;
 
   function typeMessage() {
@@ -232,3 +257,5 @@
 
 </body>
 </html>
+
+
